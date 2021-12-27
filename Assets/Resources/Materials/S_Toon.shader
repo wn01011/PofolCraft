@@ -116,10 +116,7 @@ Shader "KJK/S_Toon"
                 //BandedDiffuse 조명 처리 연산
                 float3 BandedDiffuse;
                 float NDotL = dot(s.Normal, lightDir) * 0.5f + 0.5f;    //Half Lambert 공식
-
-                //0~1로 이루어진 NDotL값을 3개의 값으로 고정함 <- Banded Lighting 작업
-                //float BandNum = 3.0f;
-                //BandedDiffuse = ceil(NDotL * BandNum) / BandNum;             
+          
                 //BandLUT 텍스처의 UV 좌표에 0~1로 이루어진 NDotL값을 넣어서 음영 색을 가져온다.
                 BandedDiffuse = tex2D(_Band_Tex, float2(NDotL, 0.5f)).rgb;
 
