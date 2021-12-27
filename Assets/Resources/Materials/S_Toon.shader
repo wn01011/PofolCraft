@@ -16,7 +16,7 @@ Shader "KJK/S_Toon"
         {
             Tags { "RenderType" = "Opaque" "Quque" = "Geometry"}
 
-            cull front    //! 1Pass´Â ¾Õ¸éÀ» ±×¸®Áö ¾Ê´Â´Ù.
+            cull front    //! 1PassëŠ” ì•ë©´ì„ ê·¸ë¦¬ì§€ ì•ŠëŠ”ë‹¤.
             Pass
             {
                 CGPROGRAM
@@ -24,14 +24,14 @@ Shader "KJK/S_Toon"
                 #pragma fragment _FragmentFuc
                 #include "UnityCG.cginc"
 
-                    struct ST_VertexInput    //! ¹öÅØ½º ½¦ÀÌ´õ Input
+                    struct ST_VertexInput    //! ë²„í…ìŠ¤ ì‰ì´ë” Input
                     {
                         float4 vertex : POSITION;
                         float2 texcoord : TEXCOORD0;
                         float3 normal : NORMAL;
                     };
 
-                    struct ST_VertexOutput    //! ¹öÅØ½º ½¦ÀÌ´õ Output
+                    struct ST_VertexOutput    //! ë²„í…ìŠ¤ ì‰ì´ë” Output
                     {
                         float4 vertex : SV_POSITION;
                         float2 UV : TEXCOORD0;
@@ -46,7 +46,7 @@ Shader "KJK/S_Toon"
 
                         float4 projPos = UnityObjectToClipPos(stInput.vertex);
 
-                        //°Å¸®¿¡ µû¶ó¼­ º¸Á¤Ä¡¸¦ ÁÜ
+                        //ê±°ë¦¬ì— ë”°ë¼ì„œ ë³´ì •ì¹˜ë¥¼ ì¤Œ
                         float distanceToCamera = 0.03 * projPos.z;
                         float normalScale = _Outline_Bold * lerp(0.03, 0.3, distanceToCamera);
                         float3 fNormalized_Normal = normalize(stInput.normal);      
@@ -66,10 +66,10 @@ Shader "KJK/S_Toon"
                 ENDCG
             }
 
-            cull back    //! 2Pass´Â µŞ¸éÀ» ±×¸®Áö ¾Ê´Â´Ù.
+            cull back    //! 2PassëŠ” ë’·ë©´ì„ ê·¸ë¦¬ì§€ ì•ŠëŠ”ë‹¤.
             CGPROGRAM
 
-            #pragma surface surf _BandedLighting//! Ä¿½ºÅÒ ¶óÀÌÆ® »ç¿ë
+            #pragma surface surf _BandedLighting//! ì»¤ìŠ¤í…€ ë¼ì´íŠ¸ ì‚¬ìš©
 
             struct Input
             {
@@ -78,7 +78,7 @@ Shader "KJK/S_Toon"
                 float2 uv_BumpMap;
             };
 
-            struct SurfaceOutputCustom        //! Custom SurfaceOutput ±¸Á¶Ã¼, BandLUT ÅØ½ºÃ³¸¦ ³Ö±â À§ÇØ ¸¸µë
+            struct SurfaceOutputCustom        //! Custom SurfaceOutput êµ¬ì¡°ì²´, BandLUT í…ìŠ¤ì²˜ë¥¼ ë„£ê¸° ìœ„í•´ ë§Œë“¬
             {
                 fixed3 Albedo;
                 fixed3 Normal;
@@ -99,28 +99,28 @@ Shader "KJK/S_Toon"
 
             void surf(Input IN, inout SurfaceOutputCustom o)
             {
-                float4 fMainTex = tex2D(_MainTex, IN.uv_MainTex);
-                o.Albedo = fMainTex.rgb;
+                float4 MainTex = tex2D(_MainTex, IN.uv_MainTex);
+                o.Albedo = MainTex.rgb;
                 o.Alpha = 1.0f;
 
-                float4 fBandLUT = tex2D(_Band_Tex, IN.uv_Band_Tex);
-                o.BandLUT = fBandLUT.rgb;
+                float4 BandLUT = tex2D(_Band_Tex, IN.uv_Band_Tex);
+                o.BandLUT = BandLUT.rgb;
 
-                float3 fNormalTex = UnpackNormal(tex2D(_BumpMap, IN.uv_BumpMap));
-                o.Normal = fNormalTex;
+                float3 NormalTex = UnpackNormal(tex2D(_BumpMap, IN.uv_BumpMap));
+                o.Normal = NormalTex;
             }
 
-            //! Ä¿½ºÅÒ ¶óÀÌÆ® ÇÔ¼ö
+            //! ì»¤ìŠ¤í…€ ë¼ì´íŠ¸ í•¨ìˆ˜
             float4 Lighting_BandedLighting(SurfaceOutputCustom s, float3 lightDir, float3 viewDir, float atten)
             {
-                //! BandedDiffuse Á¶¸í Ã³¸® ¿¬»ê
+                //! BandedDiffuse ì¡°ëª… ì²˜ë¦¬ ì—°ì‚°
                 float3 fBandedDiffuse;
-                float fNDotL = dot(s.Normal, lightDir) * 0.5f + 0.5f;    //! Half Lambert °ø½Ä
+                float fNDotL = dot(s.Normal, lightDir) * 0.5f + 0.5f;    //! Half Lambert ê³µì‹
 
-                //! 0~1·Î ÀÌ·ç¾îÁø fNDotL°ªÀ» 3°³ÀÇ °ªÀ¸·Î °íÁ¤ÇÔ <- Banded Lighting ÀÛ¾÷
+                //! 0~1ë¡œ ì´ë£¨ì–´ì§„ fNDotLê°’ì„ 3ê°œì˜ ê°’ìœ¼ë¡œ ê³ ì •í•¨ <- Banded Lighting ì‘ì—…
                 //float fBandNum = 3.0f;
                 //fBandedDiffuse = ceil(fNDotL * fBandNum) / fBandNum;             
-                //! BandLUT ÅØ½ºÃ³ÀÇ UV ÁÂÇ¥¿¡ 0~1·Î ÀÌ·ç¾îÁø NDotL°ªÀ» ³Ö¾î¼­ À½¿µ »öÀ» °¡Á®¿Â´Ù.
+                //! BandLUT í…ìŠ¤ì²˜ì˜ UV ì¢Œí‘œì— 0~1ë¡œ ì´ë£¨ì–´ì§„ NDotLê°’ì„ ë„£ì–´ì„œ ìŒì˜ ìƒ‰ì„ ê°€ì ¸ì˜¨ë‹¤.
                 fBandedDiffuse = tex2D(_Band_Tex, float2(fNDotL, 0.5f)).rgb;
 
                 float3 SpecularColor;
@@ -132,7 +132,7 @@ Shader "KJK/S_Toon"
                 float SpecularSmooth = smoothstep(0.005, 0.01f, PowedHDotN);
                 SpecularColor = SpecularSmooth * 1.0f;
 
-                //! ÃÖÁ¾ ÄÃ·¯ Ãâ·Â
+                //! ìµœì¢… ì»¬ëŸ¬ ì¶œë ¥
                 float4 FinalColor;
                 FinalColor.rgb = ((s.Albedo * _Color) + SpecularColor) *
                                      fBandedDiffuse * _LightColor0.rgb * atten;
