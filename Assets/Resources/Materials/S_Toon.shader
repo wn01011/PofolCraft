@@ -110,32 +110,32 @@ Shader "KJK/S_Toon"
                 o.Normal = NormalTex;
             }
 
-            //! 커스텀 라이트 함수
+            //커스텀 라이트 함수
             float4 Lighting_BandedLighting(SurfaceOutputCustom s, float3 lightDir, float3 viewDir, float atten)
             {
-                //! BandedDiffuse 조명 처리 연산
-                float3 fBandedDiffuse;
-                float fNDotL = dot(s.Normal, lightDir) * 0.5f + 0.5f;    //! Half Lambert 공식
+                //BandedDiffuse 조명 처리 연산
+                float3 BandedDiffuse;
+                float NDotL = dot(s.Normal, lightDir) * 0.5f + 0.5f;    //Half Lambert 공식
 
-                //! 0~1로 이루어진 fNDotL값을 3개의 값으로 고정함 <- Banded Lighting 작업
-                //float fBandNum = 3.0f;
-                //fBandedDiffuse = ceil(fNDotL * fBandNum) / fBandNum;             
-                //! BandLUT 텍스처의 UV 좌표에 0~1로 이루어진 NDotL값을 넣어서 음영 색을 가져온다.
-                fBandedDiffuse = tex2D(_Band_Tex, float2(fNDotL, 0.5f)).rgb;
+                //0~1로 이루어진 NDotL값을 3개의 값으로 고정함 <- Banded Lighting 작업
+                //float BandNum = 3.0f;
+                //BandedDiffuse = ceil(NDotL * BandNum) / BandNum;             
+                //BandLUT 텍스처의 UV 좌표에 0~1로 이루어진 NDotL값을 넣어서 음영 색을 가져온다.
+                BandedDiffuse = tex2D(_Band_Tex, float2(NDotL, 0.5f)).rgb;
 
                 float3 SpecularColor;
                 float3 HalfVector = normalize(lightDir + viewDir);
                 float HDotN = saturate(dot(HalfVector, s.Normal));
                 float PowedHDotN = pow(HDotN, _SpecPower);
 
-                //! smoothstep
+                //smoothstep
                 float SpecularSmooth = smoothstep(0.005, 0.01f, PowedHDotN);
                 SpecularColor = SpecularSmooth * 1.0f;
 
-                //! 최종 컬러 출력
+                //최종 컬러 출력
                 float4 FinalColor;
                 FinalColor.rgb = ((s.Albedo * _Color) + SpecularColor) *
-                                     fBandedDiffuse * _LightColor0.rgb * atten;
+                                     BandedDiffuse * _LightColor0.rgb * atten;
                 FinalColor.a = s.Alpha;
                 return FinalColor;
             }
